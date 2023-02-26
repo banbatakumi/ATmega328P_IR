@@ -10,8 +10,14 @@
 #define PIN_7 4
 #define IR_NUM 8
 #define READ_NUMBER_OF_TIME 500
+#define DISTANCE_RC 0.5
 
+uint8_t angle_plus, angle_minus;
 uint16_t value[8];
+int16_t result_vector_x, result_vector_y;
+int16_t pre_angle, pre_distance, angle, distance;
+float unit_vector_x[IR_NUM];
+float unit_vector_y[IR_NUM];
 
 void setup() {
       pinMode(PIN_0, INPUT);
@@ -23,7 +29,12 @@ void setup() {
       pinMode(PIN_6, INPUT);
       pinMode(PIN_7, INPUT);
 
-      Serial.begin(9600);
+      Serial.begin(38400);
+
+      for (uint8_t count = 0; count < IR_NUM; count++) {
+            unit_vector_x[count] = cos((count * 360.000 / IR_NUM) * PI / 180.000);
+            unit_vector_y[count] = sin((count * 360.000 / IR_NUM) * PI / 180.000);
+      }
 }
 
 void loop() {
@@ -38,20 +49,37 @@ void loop() {
             value[6] += digitalRead(PIN_6);
             value[7] += digitalRead(PIN_7);
       }
-      Serial.print("0: ");
-      Serial.print(value[0]);
-      Serial.print("1: ");
-      Serial.print(value[1]);
-      Serial.print("2: ");
-      Serial.print(value[2]);
-      Serial.print("3: ");
-      Serial.print(value[3]);
-      Serial.print("4: ");
-      Serial.print(value[4]);
-      Serial.print("5: ");
-      Serial.print(value[5]);
-      Serial.print("6: ");
-      Serial.print(value[6]);
-      Serial.print("7: ");
-      Serial.println(value[7]);
+      for (uint8_t count = 0; count < IR_NUM; count++) value[count] = (READ_NUMBER_OF_TIME - value[count]) / (READ_NUMBER_OF_TIME / 100);
+
+      result_vector_x = 0;
+      result_vector_y = 0;
+      for (uint8_t count = 0; count < IR_NUM; count++) {
+            result_vector_x += value[count] * unit_vector_x[count];
+            result_vector_y += value[count] * unit_vector_y[count];
+      }
+
+      angle = atan2(result_vector_y, result_vector_x) / PI * 180.500;
+
+      distance = 0;
+      for (uint8_t count = 0; count < IR_NUM; count++) {
+            if (distance < value[count] + 30) distance = value[count] + 30;
+      }
+      if (distance == 30) distance = 0;
+      distance = (1 - DISTANCE_RC) * distance + DISTANCE_RC * pre_distance;
+      pre_distance = distance;
+
+      angle_plus = angle > 0 ? angle : 0;
+      angle_minus = angle < 0 ? angle * -1 : 0;
+
+      Serial.write('a');
+      Serial.write(angle_plus);
+      Serial.write(angle_minus);
+      Serial.write(distance);
+
+      /*
+      Serial.print("angle: ");
+      Serial.print(angle);
+      Serial.print(" distance: ");
+      Serial.println(distance);
+      */
 }
