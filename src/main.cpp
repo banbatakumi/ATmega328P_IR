@@ -10,12 +10,13 @@
 #define PIN_7 4
 #define IR_NUM 8
 #define READ_NUMBER_OF_TIME 1000
-#define DISTANCE_RC 0.5
+#define DISTANCE_RC 0.3
 
 uint8_t angle_plus, angle_minus;
 uint16_t value[8];
 int16_t result_vector_x, result_vector_y;
 int16_t pre_angle, pre_distance, angle, distance;
+int16_t max_ir, max_value;
 float unit_vector_x[IR_NUM];
 float unit_vector_y[IR_NUM];
 
@@ -64,11 +65,21 @@ void loop() {
 
       angle = atan2(result_vector_y, result_vector_x) / PI * 180.500;
 
+      max_value = 0;
+      for (uint8_t count = 0; count < IR_NUM; count++) {
+            if (max_value < value[count]){
+                  max_value = value[count];
+                  max_ir = count;
+            }
+      }
+      distance = (value[max_ir - 1 < 0 ? 7 : max_ir - 1] + value[max_ir] + value[max_ir + 1 > 7 ? 0 : max_ir + 1]) / 3;
+/*
       distance = 0;
       for (uint8_t count = 0; count < IR_NUM; count++) {
-            if (distance < value[count] + 30) distance = value[count] + 30;
-      }
-      if (distance == 30) distance = 0;
+            if (distance < value[count]) distance = value[count];
+      }*/
+      distance += 50;
+      if (distance == 50) distance = 0;
       distance = (1 - DISTANCE_RC) * distance + DISTANCE_RC * pre_distance;
       pre_distance = distance;
 
