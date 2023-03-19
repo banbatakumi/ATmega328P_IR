@@ -9,8 +9,9 @@
 #define PIN_6 7
 #define PIN_7 4
 #define IR_NUM 8
-#define READ_NUMBER_OF_TIME 1000
-#define DISTANCE_RC 0.3
+#define READ_NUMBER_OF_TIME 500
+#define DISTANCE_RC 0.25
+#define SERIAL_BAUD 38400   // UART通信速度
 
 uint8_t angle_plus, angle_minus;
 uint16_t value[8];
@@ -34,7 +35,7 @@ void setup() {
       pinMode(PIN_7, INPUT);
       */
 
-      Serial.begin(38400);
+      Serial.begin(SERIAL_BAUD);   // UART通信速度);
 
       for (uint8_t count = 0; count < IR_NUM; count++) {
             unit_vector_x[count] = cos((count * 360.000 / IR_NUM) * PI / 180.000);
@@ -90,6 +91,7 @@ void loop() {
       Serial.write(angle_plus);
       Serial.write(angle_minus);
       Serial.write(distance);
+      Serial.flush();
 
       /*
       Serial.print("angle: ");
