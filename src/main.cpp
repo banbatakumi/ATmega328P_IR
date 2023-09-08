@@ -10,9 +10,9 @@
 #define PIN_7 4
 #define IR_NUM 8
 #define READ_NUMBER_OF_TIME 500
-#define ANGLE_MOVING_AVERAGE_COUNT_NUMBER 10
+#define ANGLE_MOVING_AVERAGE_COUNT_NUMBER 5
 #define DISTANCE_MOVING_AVERAGE_COUNT_NUMBER 10
-#define SERIAL_BAUD 38400   // UART通信速度
+#define SERIAL_BAUD 115200   // UART通信速度
 
 uint8_t angle_plus, angle_minus;
 
